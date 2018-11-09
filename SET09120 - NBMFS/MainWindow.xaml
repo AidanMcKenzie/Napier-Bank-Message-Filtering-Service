@@ -5,8 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SET09120___NBMFS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="400" Width="500">
     <Grid>
-        
+        <TextBox x:Name="txtHeader" HorizontalAlignment="Left" Height="23" Margin="116,52,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240"/>
+        <TextBox x:Name="txtSender" HorizontalAlignment="Left" Height="23" Margin="116,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240"/>
+        <Label x:Name="lblHeader" Content="Header" HorizontalAlignment="Left" Margin="37,49,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblSender" Content="Sender" HorizontalAlignment="Left" Margin="38,134,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblBody" Content="Body" HorizontalAlignment="Left" Margin="48,165,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtBody" HorizontalAlignment="Left" Height="130" Margin="116,169,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240"/>
+        <Button x:Name="btnSend" Content="Send Message" HorizontalAlignment="Left" Margin="199,326,0,0" VerticalAlignment="Top" Width="95" Click="btnSend_Click"/>
+        <Label x:Name="lblMsgType" Content="Label" HorizontalAlignment="Left" Margin="47,89,0,0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="blkMsgType" HorizontalAlignment="Left" Margin="116,94,0,0" TextWrapping="Wrap" Text="MessageTypeHere" VerticalAlignment="Top"/>
+
     </Grid>
 </Window>
