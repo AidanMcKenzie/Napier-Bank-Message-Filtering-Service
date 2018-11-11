@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 //using System.Windows.Forms;
 
+
 namespace SET09120___NBMFS
 {
     /// <summary>
@@ -23,8 +24,9 @@ namespace SET09120___NBMFS
     {
         public string header;
         public string messageType;
-        public string sender;
+        public string msgSender;
         public string subject;
+        public string emailType;
         public string body;
         
 
@@ -33,17 +35,15 @@ namespace SET09120___NBMFS
             InitializeComponent();
         }
 
-        /*private void txtHeader_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-
-        }*/
+        
 
         private void btnSend_Click(object sender, RoutedEventArgs e)
         {
             header = txtHeader.Text;
             messageType = header.Substring(0, 1).ToUpper();
-            sender = txtSender.Text;
-            //subject = txtSubject.Text
+            msgSender = txtSender.Text;
+            subject = txtSubject.Text; //For emails only
+            emailType = header.Substring(0, 3).ToUpper();
             body = txtBody.Text;
 
 
@@ -57,6 +57,11 @@ namespace SET09120___NBMFS
                         if (body.Length > 0 && body.Length <= 140)
                         {
                             MessageBox.Show(body);
+                            // Sender must be intl phone number
+                            // Create SMS object (id, header, sender, body)
+                            SMS sms = new SMS(1, header, msgSender, body);
+                            // Convert textspeak
+                            // Output to file in JSON format
                         }
                         else
                         {
@@ -65,9 +70,49 @@ namespace SET09120___NBMFS
                         break;
                     case "E":
                         MessageBox.Show("Email!");
+
+                        if (body.Length > 0 && body.Length <= 1028)
+                        {
+                            if (emailType.Equals("SIR"))
+                            {
+                                MessageBox.Show("SIR Email!");
+                            }
+                            else
+                            {
+                                MessageBox.Show("Standard Email!");
+                            }
+
+                            MessageBox.Show(body);
+                            // if subject is in form "SIR dd/mm/yy"
+                            // Sender must be standard email address
+                            // Create email object (id, header, sender, body)
+                                    //Email email = new Email(1, header, msgSender, body);
+                            // Quarantine URLs
+                            // Output to file in JSON format
+                        }
+                        else
+                        {
+                            MessageBox.Show("Please ensure the email body is between 0 and 1028 characters.");
+                        }
+
                         break;
                     case "T":
                         MessageBox.Show("Tweet!");
+
+                        if (body.Length > 0 && body.Length <= 140)
+                        {
+                            MessageBox.Show(body);
+                            // Sender must be twitter ID
+                            // Create Tweet object (id, header, sender, body)
+                                    //Tweet tweet = new Tweet(1, header, msgSender, body);
+                            // Convert textspeak, add to hashtag list, add to sender list
+                            // Output to file in JSON format
+                        }
+                        else
+                        {
+                            MessageBox.Show("Please ensure the Tweet body is between 0 and 140 characters.");
+                        }
+
                         break;
                     default:
                         MessageBox.Show("Please enter a valid message header.");
