@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 //using System.Windows.Forms;
+using Newtonsoft.Json;
 
 
 namespace SET09120___NBMFS
@@ -22,6 +24,7 @@ namespace SET09120___NBMFS
     /// </summary>
     public partial class MainWindow : Window
     {
+        // Declare strings used for text boxes
         public string header;
         public string messageType;
         public string msgSender;
@@ -36,7 +39,7 @@ namespace SET09120___NBMFS
         }
 
         
-
+        // Application logic for when the user clicks the 'Send Message' button
         private void btnSend_Click(object sender, RoutedEventArgs e)
         {
             header = txtHeader.Text;
@@ -46,11 +49,13 @@ namespace SET09120___NBMFS
             emailType = header.Substring(0, 3).ToUpper();
             body = txtBody.Text;
 
-
-            if (header.Length == 9)
+            // Header must be a letter followed by nine numbers
+            if (header.Length == 10)
             {
+                // Begin case statement for different message types
                 switch (messageType)
                 {
+                    // If header begins with 'S', message is an SMS
                     case "S":
                         MessageBox.Show("SMS!");
 
@@ -59,15 +64,29 @@ namespace SET09120___NBMFS
                             MessageBox.Show(body);
                             // Sender must be intl phone number
                             // Create SMS object (id, header, sender, body)
-                            SMS sms = new SMS(1, header, msgSender, body);
+                            SMS sms  = new SMS(header, msgSender, body);
                             // Convert textspeak
-                            // Output to file in JSON format
+
+                            // serialize JSON to a string and then write string to a file
+                            
+                            if (File.Exists(@"c:\Users\aidan\Documents\messages.json"))
+                            {
+                                File.AppendAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(sms, Formatting.Indented) + Environment.NewLine);
+                            }
+                            else
+                            {
+                                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(sms, Formatting.Indented));
+                            }
+
+                            MessageBox.Show("Written to file!");
                         }
                         else
                         {
                             MessageBox.Show("Please ensure the SMS body is between 0 and 140 characters.");
                         }
                         break;
+
+                    // If header begins with 'E', message is an Email
                     case "E":
                         MessageBox.Show("Email!");
 
@@ -76,19 +95,26 @@ namespace SET09120___NBMFS
                             if (emailType.Equals("SIR"))
                             {
                                 MessageBox.Show("SIR Email!");
+                                
+                                // Create email object (id, header, sender, body)
+                                //Email email = new Email(1, header, msgSender, body);
+                                // Quarantine URLs
+                                // Output to file in JSON format
                             }
                             else
                             {
                                 MessageBox.Show("Standard Email!");
+
+                                // Create email object (id, header, sender, body)
+                                //Email email = new Email(1, header, msgSender, body);
+                                // Quarantine URLs
+                                // Output to file in JSON format
                             }
 
                             MessageBox.Show(body);
-                            // if subject is in form "SIR dd/mm/yy"
                             // Sender must be standard email address
-                            // Create email object (id, header, sender, body)
-                                    //Email email = new Email(1, header, msgSender, body);
-                            // Quarantine URLs
-                            // Output to file in JSON format
+                            
+                            
                         }
                         else
                         {
@@ -96,6 +122,8 @@ namespace SET09120___NBMFS
                         }
 
                         break;
+
+                    // If header begins with 'T', message is a Tweet
                     case "T":
                         MessageBox.Show("Tweet!");
 
@@ -104,7 +132,7 @@ namespace SET09120___NBMFS
                             MessageBox.Show(body);
                             // Sender must be twitter ID
                             // Create Tweet object (id, header, sender, body)
-                                    //Tweet tweet = new Tweet(1, header, msgSender, body);
+                            //Tweet tweet = new Tweet(1, header, msgSender, body);
                             // Convert textspeak, add to hashtag list, add to sender list
                             // Output to file in JSON format
                         }
@@ -114,6 +142,8 @@ namespace SET09120___NBMFS
                         }
 
                         break;
+
+                    // If header begins with any character other than 'S', 'E' or 'T', alert the user
                     default:
                         MessageBox.Show("Please enter a valid message header.");
                         break;
@@ -123,7 +153,20 @@ namespace SET09120___NBMFS
             {
                 MessageBox.Show("Please enter a message header that is a single character followed by nine numbers. \n e.g.: 'E123456789'");
             }
+        }
 
+        private void txtHeader_KeyUp(object sender, KeyEventArgs e)
+        {
+            /*if (e)
+
+            switch (e.KeyCode)
+            {
+                case Keys.NumPad1:
+                    break;
+                case Keys.NumPad2:
+                    break;
+                    //...
+            }*/
         }
     }
 }

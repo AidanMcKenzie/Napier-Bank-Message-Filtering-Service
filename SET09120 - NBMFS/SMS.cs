@@ -15,9 +15,9 @@ namespace SET09120___NBMFS
         public string body { get; set; }
 
 
-        public SMS(int IDIn, string headerIn, string senderIn, string bodyIn)
+        public SMS(string headerIn, string senderIn, string bodyIn)
         {
-            id = IDIn;
+            id = id++;
             header = headerIn;
             msgSender = senderIn;
             body = bodyIn;
