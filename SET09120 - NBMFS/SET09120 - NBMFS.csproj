@@ -58,7 +58,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Email.cs" />
+    <Compile Include="Hashtag.cs" />
     <Compile Include="HashtagList.xaml.cs">
       <DependentUpon>HashtagList.xaml</DependentUpon>
     </Compile>
@@ -72,8 +72,6 @@
     <Compile Include="SIRList.xaml.cs">
       <DependentUpon>SIRList.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SMS.cs" />
-    <Compile Include="Tweet.cs" />
     <Page Include="HashtagList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

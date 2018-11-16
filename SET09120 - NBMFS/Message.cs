@@ -8,9 +8,7 @@ namespace SET09120___NBMFS
 {
     public class Message
     {
-
-
-        // Getters and setters for Email variables
+        // Getters and setters
         public string header { get; set; }
         public string msgSender { get; set; }
         public string subject { get; set; }
@@ -34,17 +32,11 @@ namespace SET09120___NBMFS
          public string QuarantineURLs(bodyIn)
          {
 
-         }*/
-
-        
+         }*/ 
     }
 
     public class MsgList
     {
         public List<Message> Messages { get; set; }
     }
-
-
-
-
 }

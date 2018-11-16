@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,7 +16,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Newtonsoft.Json;
-using System.Runtime.Serialization;
 
 
 namespace SET09120___NBMFS
@@ -30,6 +31,15 @@ namespace SET09120___NBMFS
         public string body;
 
         public static MsgList messageList;
+
+        string headerRegex = "";
+        string smsSenderRegex = @"^(\+[1-9][0-9]*(\([0-9]*\)|-[0-9]*-))?[0]?[1-9][0-9\- ]*$";
+        string emailSenderRegex = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
+        string tweetSenderRegex = @"\A([0-9a-zA-Z_]{1,15})|(@([0-9a-zA-Z_]{1,15}))\Z";
+        string sirRegex = @"((\d{2})|(\d))\/((\d{2})|(\d))\/((\d{4})|(\d{2}))";
+        string sortcodeRegex = @"^(\d){2}-(\d){2}-(\d){2}$";
+
+
 
         // Create dictionary from the textwords CSV file
         //public static Dictionary<string, string> textwordsList = File.ReadLines("c:\Users\aidan\Documents\textwords.csv").Select(line => line.Split(',')).ToDictionary(line => line[0], line => line[1]);
@@ -58,6 +68,7 @@ namespace SET09120___NBMFS
             }
 
             body = txtBody.Text;
+            string sortcode = txtSortCode.Text;
 
             // Header must be a letter followed by nine numbers
             if (header.Length == 10)
@@ -67,64 +78,119 @@ namespace SET09120___NBMFS
                 {
                     // If header begins with 'S', message is an SMS
                     case "S":
-                        // If the body text is between 1 and 140 characters
-                        if (body.Length > 0 && body.Length <= 140)
-                        {
-                            // Create SMS object (id, header, sender, body)
-                            Message sms = new Message(header, msgSender, subject, body);
+                        
+                        Match smsSenderValid = Regex.Match(msgSender, smsSenderRegex);
 
-                            WriteMessageToFile(sms);
+                        if (smsSenderValid.Success && msgSender.Length <= 15)
+                        {
+                            // If the body text is between 1 and 140 characters
+                            if (body.Length > 0 && body.Length <= 140)
+                            {
+                                // Create SMS object (id, header, sender, body)
+                                Message sms = new Message(header, msgSender, subject, body);
+
+                                WriteMessageToFile(sms);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Please ensure the SMS body is between 0 and 140 characters.");
+                            }
                         }
                         else
                         {
-                            MessageBox.Show("Please ensure the SMS body is between 0 and 140 characters.");
+                            MessageBox.Show("Please ensure the sender for this SMS is a valid international phone number.");
                         }
                         break;
 
                     // If header begins with 'E', message is an Email
                     case "E":
-                        if (body.Length > 0 && body.Length <= 1028)
-                        {
-                            if (emailType.Equals("SIR"))
-                            {
-                                MessageBox.Show("SIR Email");
-                                // Create email object (id, header, sender, body)
-                                Message email = new Message(header, msgSender, subject, body);
-                                WriteMessageToFile(email);
+                        
+                        //if sender is a valid email address
+                        Match senderValid = Regex.Match(msgSender, emailSenderRegex);
 
-                                // Quarantine URLs
+                        if (senderValid.Success)
+                        {
+                            if (subject.Length > 0 && subject.Length <= 20)
+                            {
+                                if (body.Length > 0 && body.Length <= 1028)
+                                {
+                                    Match detectSIR = Regex.Match(subject, sirRegex);
+
+                                    if (detectSIR.Success)
+                                    {
+                                        Match sortcodeValid = Regex.Match(sortcode, sortcodeRegex);
+
+                                        if (sortcodeValid.Success)
+                                        {
+                                            MessageBox.Show("SIR Email");
+
+                                            Message email = new Message(header, msgSender, subject, body);
+                                            WriteMessageToFile(email);
+
+                                            // Quarantine URLs
+                                        }
+                                        else
+                                        {
+                                            MessageBox.Show("Please ensure sort code is in the format XX-XX-XX.");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("Standard email");
+
+                                        Message email = new Message(header, msgSender, subject, body);
+                                        WriteMessageToFile(email);
+
+                                        // Quarantine URLs
+                                    }
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Please ensure the email body is between 0 and 1028 characters.");
+                                }
                             }
                             else
                             {
-                                MessageBox.Show("Standard email");
-                                // Create email object (id, header, sender, body)
-                                Message email = new Message(header, msgSender, subject, body);
-                                WriteMessageToFile(email);
-
-                                // Quarantine URLs
+                                MessageBox.Show("Please ensure the email subject is 20 characters or less.");
                             }
                         }
                         else
                         {
-                            MessageBox.Show("Please ensure the email body is between 0 and 1028 characters.");
+                            MessageBox.Show("Please ensure the sender field is a valid email address (e.g. johnsmith@email.com, jane.smith@email.co.uk");
                         }
 
                         break;
 
                     // If header begins with 'T', message is a Tweet
                     case "T":
-                        if (body.Length > 0 && body.Length <= 140)
-                        {
-                            // Sender must be twitter ID
-                            // Create Tweet object
-                            Message tweet = new Message(header, msgSender, subject, body);
-                            WriteMessageToFile(tweet);
 
-                            // Convert textspeak, add to hashtag list, add to sender list
+                        Match tweeterValid = Regex.Match(msgSender, tweetSenderRegex);
+
+                        if (tweeterValid.Success)
+                        {
+                            // if sender is @ followed by 15 characters
+                            if (body.Length > 0 && body.Length <= 140)
+                            {
+                                if (msgSender.Substring(0,1) != "@" && msgSender.Length < 15)
+                                {
+                                    msgSender = "@" + msgSender;
+                                    MessageBox.Show("Added @ to handle");
+                                }
+                                
+                                // Create Tweet object
+                                Message tweet = new Message(header, msgSender, subject, body);
+                                WriteMessageToFile(tweet);
+
+                                // Convert textspeak, add to hashtag list, add to sender list
+                            }
+                            else
+                            {
+                                MessageBox.Show("Please ensure the Tweet body is between 0 and 140 characters.");
+                            }
                         }
                         else
                         {
-                            MessageBox.Show("Please ensure the Tweet body is between 0 and 140 characters.");
+                            MessageBox.Show("Please ensure the Tweet sender is a maximum of 15 characters.");
                         }
                         break;
 
@@ -149,14 +215,14 @@ namespace SET09120___NBMFS
 
         private void btnTrending_Click(object sender, RoutedEventArgs e)
         {
-            //Page TrendingList = new TrendingList();
-            //TrendingList.Show();
+            Window HashtagList = new HashtagList();
+            HashtagList.Show();
         }
 
         private void btnMentions_Click(object sender, RoutedEventArgs e)
         {
             Window MentionList = new MentionList();
-            MentionList.Show();
+            MentionList.ShowDialog();
         }
 
         private void txtHeader_TextChanged(object sender, TextChangedEventArgs e)
@@ -176,7 +242,15 @@ namespace SET09120___NBMFS
                         txtSubject.Visibility = Visibility.Hidden;
                         lblSubject.Visibility = Visibility.Hidden;
 
+                        txtSortCode.Visibility = Visibility.Hidden;
+                        lblSortCode.Visibility = Visibility.Hidden;
+
+                        cmbIncident.Visibility = Visibility.Hidden;
+                        lblIncident.Visibility = Visibility.Hidden;
+
                         blkMsgType.Text = "SMS";
+
+                        blkMaxCharCount.Text = "140";
 
                         break;
 
@@ -185,7 +259,15 @@ namespace SET09120___NBMFS
                         txtSubject.Visibility = Visibility.Visible;
                         lblSubject.Visibility = Visibility.Visible;
 
+                        txtSortCode.Visibility = Visibility.Visible;
+                        lblSortCode.Visibility = Visibility.Visible;
+
+                        cmbIncident.Visibility = Visibility.Visible;
+                        lblIncident.Visibility = Visibility.Visible;
+
                         blkMsgType.Text = "Email";
+                        blkMaxCharCount.Text = "1028";
+
                         break;
 
                     case "T":
@@ -193,7 +275,14 @@ namespace SET09120___NBMFS
                         txtSubject.Visibility = Visibility.Hidden;
                         lblSubject.Visibility = Visibility.Hidden;
 
+                        txtSortCode.Visibility = Visibility.Hidden;
+                        lblSortCode.Visibility = Visibility.Hidden;
+
+                        cmbIncident.Visibility = Visibility.Hidden;
+                        lblIncident.Visibility = Visibility.Hidden;
+
                         blkMsgType.Text = "Tweet";
+                        blkMaxCharCount.Text = "140";
                         break;
 
                     case "":
@@ -206,7 +295,14 @@ namespace SET09120___NBMFS
                         txtSubject.Visibility = Visibility.Hidden;
                         lblSubject.Visibility = Visibility.Hidden;
 
+                        txtSortCode.Visibility = Visibility.Hidden;
+                        lblSortCode.Visibility = Visibility.Hidden;
+
+                        cmbIncident.Visibility = Visibility.Hidden;
+                        lblIncident.Visibility = Visibility.Hidden;
+
                         blkMsgType.Text = "";
+                        blkMaxCharCount.Text = "";
                         break;
                 }
 
@@ -215,6 +311,13 @@ namespace SET09120___NBMFS
             {
                 txtSubject.Visibility = Visibility.Hidden;
                 lblSubject.Visibility = Visibility.Hidden;
+
+                txtSortCode.Visibility = Visibility.Hidden;
+                lblSortCode.Visibility = Visibility.Hidden;
+
+                cmbIncident.Visibility = Visibility.Hidden;
+                lblIncident.Visibility = Visibility.Hidden;
+
                 blkMsgType.Text = "";
             }
         }
@@ -247,8 +350,10 @@ namespace SET09120___NBMFS
         private void clearFields()
         {
             txtHeader.Clear();
-            txtSubject.Clear();
             txtSender.Clear();
+            txtSubject.Clear();
+            txtSortCode.Clear();
+            //cmbIncident.ClearValue();
             txtBody.Clear();
         }
 
@@ -259,8 +364,56 @@ namespace SET09120___NBMFS
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            txtSubject.Visibility = System.Windows.Visibility.Hidden;
-            lblSubject.Visibility = System.Windows.Visibility.Hidden;
+            txtSubject.Visibility = Visibility.Hidden;
+            lblSubject.Visibility = Visibility.Hidden;
+
+            txtSortCode.Visibility = Visibility.Hidden;
+            lblSortCode.Visibility = Visibility.Hidden;
+
+            cmbIncident.Visibility = Visibility.Hidden;
+            lblIncident.Visibility = Visibility.Hidden;
+
+            blkCurCharCount.Text = txtBody.Text.Length.ToString();
+            blkMaxCharCount.Text = "140";
+        }
+
+        private void TxtBody_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            float charCount = txtBody.Text.Length;
+            float maxCount = Int32.Parse(blkMaxCharCount.Text);
+
+            float percentile = (charCount / maxCount) * 100;
+
+            blkCurCharCount.Text = charCount.ToString();
+
+            if (percentile > 100)
+            {
+                blkCurCharCount.Foreground = new SolidColorBrush(Colors.Red);
+            }
+            else
+            {
+                blkCurCharCount.Foreground = new SolidColorBrush(Colors.Black);
+            }
+        }
+
+        private void TxtSubject_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            /*if (subject.Substring(0, 3).ToUpper() == "SIR")
+            {
+                txtSortCode.Visibility = Visibility.Visible;
+                lblSortCode.Visibility = Visibility.Visible;
+
+                cmbIncident.Visibility = Visibility.Visible;
+                lblIncident.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                txtSortCode.Visibility = Visibility.Hidden;
+                lblSortCode.Visibility = Visibility.Hidden;
+
+                cmbIncident.Visibility = Visibility.Hidden;
+                lblIncident.Visibility = Visibility.Hidden;
+            }*/
         }
     }
 
