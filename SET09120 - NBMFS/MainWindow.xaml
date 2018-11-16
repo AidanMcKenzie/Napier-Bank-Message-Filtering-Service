@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SET09120___NBMFS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="500">
+        Title="MainWindow" Height="550" Width="500" Loaded="Window_Loaded">
     <Grid>
-        <TextBox x:Name="txtHeader" HorizontalAlignment="Left" Height="23" Margin="139,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240" KeyUp="txtHeader_KeyUp"/>
+        <TextBox x:Name="txtHeader" HorizontalAlignment="Left" Height="23" Margin="139,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240" KeyUp="txtHeader_KeyUp" TextChanged="txtHeader_TextChanged"/>
         <TextBox x:Name="txtSender" HorizontalAlignment="Left" Height="23" Margin="139,152,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240"/>
         <Label x:Name="lblHeader" Content="Header" HorizontalAlignment="Left" Margin="74,89,0,0" VerticalAlignment="Top"/>
         <Label x:Name="lblSender" Content="Sender" HorizontalAlignment="Left" Margin="74,149,0,0" VerticalAlignment="Top"/>
@@ -15,13 +15,14 @@
         <TextBox x:Name="txtBody" HorizontalAlignment="Left" Height="130" Margin="139,222,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240"/>
         <Button x:Name="btnSend" Content="Send Message" HorizontalAlignment="Left" Margin="199,379,0,0" VerticalAlignment="Top" Width="95" Click="btnSend_Click"/>
         <Label x:Name="lblMsgType" Content="Message Type" HorizontalAlignment="Left" Margin="37,118,0,0" VerticalAlignment="Top"/>
-        <TextBlock x:Name="blkMsgType" HorizontalAlignment="Left" Margin="139,123,0,0" TextWrapping="Wrap" Text="MessageTypeHere" VerticalAlignment="Top"/>
+        <TextBlock x:Name="blkMsgType" HorizontalAlignment="Left" Margin="139,123,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
         <Label x:Name="lblSubject" Content="Subject" HorizontalAlignment="Left" Margin="72,184,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="txtSubject" HorizontalAlignment="Left" Height="23" Margin="139,187,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="240"/>
-        <Button x:Name="btnTrending" Content="View Trending" HorizontalAlignment="Left" Margin="319,406,0,0" VerticalAlignment="Top" Width="100"/>
-        <Button x:Name="btnMentions" Content="View Mentions" HorizontalAlignment="Left" Margin="319,431,0,0" VerticalAlignment="Top" Width="100"/>
-        <Button x:Name="btnSIR" Content="View SIR List" HorizontalAlignment="Left" Margin="319,379,0,0" VerticalAlignment="Top" Width="100"/>
+        <Button x:Name="btnTrending" Content="View Trending" HorizontalAlignment="Left" Margin="319,406,0,0" VerticalAlignment="Top" Width="100" Click="btnTrending_Click"/>
+        <Button x:Name="btnMentions" Content="View Mentions" HorizontalAlignment="Left" Margin="319,431,0,0" VerticalAlignment="Top" Width="100" Click="btnMentions_Click"/>
+        <Button x:Name="btnSIR" Content="View SIR List" HorizontalAlignment="Left" Margin="319,379,0,0" VerticalAlignment="Top" Width="100" Click="btnSIR_Click"/>
         <Label x:Name="lblTitle" Content="Napier Bank Message Filtering System" HorizontalAlignment="Center" Margin="58,10,39,0" VerticalAlignment="Top" FontFamily="Segoe UI Semibold" FontSize="22" Width="395"/>
+        <Button x:Name="btnClear" Content="Clear Fields" HorizontalAlignment="Left" Margin="219,416,0,0" VerticalAlignment="Top" Width="75" Click="btnClear_Click"/>
 
     </Grid>
 </Window>
