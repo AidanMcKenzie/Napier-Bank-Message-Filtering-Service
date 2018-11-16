@@ -74,31 +74,6 @@ namespace SET09120___NBMFS
                             Message sms = new Message(header, msgSender, subject, body);
 
                             WriteMessageToFile(sms);
-
-                            // Convert textspeak
-
-
-                            /*if (File.Exists(@"c:\Users\aidan\Documents\messages.json"))
-                            {
-                                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
-                                messageList.Messages.Add(sms);
-
-                                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
-
-                                clearFields();
-                            }
-                            // Else create a new file and write to it
-                            else
-                            {
-                                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", "{\"messages\": []}");
-
-                                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
-                                messageList.Messages.Add(sms);
-
-                                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
-
-                                clearFields();
-                            }*/
                         }
                         else
                         {
@@ -114,41 +89,20 @@ namespace SET09120___NBMFS
                             {
                                 MessageBox.Show("SIR Email");
                                 // Create email object (id, header, sender, body)
-                                Email email = new Email(header, msgSender, subject, body);
+                                Message email = new Message(header, msgSender, subject, body);
+                                WriteMessageToFile(email);
+
                                 // Quarantine URLs
-                                // Output to file in JSON format
                             }
                             else
                             {
                                 MessageBox.Show("Standard email");
                                 // Create email object (id, header, sender, body)
                                 Message email = new Message(header, msgSender, subject, body);
+                                WriteMessageToFile(email);
+
                                 // Quarantine URLs
                             }
-
-
-                                if (File.Exists(@"c:\Users\aidan\Documents\messages.json"))
-                                {
-                                    messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
-                                    messageList.Messages.Add(email);
-
-                                    File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
-
-                                    clearFields();
-                                }
-                                // Else create a new file and write to it
-                                else
-                                {
-                                    File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", "{\"messages\": []}");
-
-                                    messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
-                                    messageList.Messages.Add(email);
-
-                                    File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
-
-                                    clearFields();
-                                }
-                            
                         }
                         else
                         {
@@ -164,36 +118,14 @@ namespace SET09120___NBMFS
                             // Sender must be twitter ID
                             // Create Tweet object
                             Message tweet = new Message(header, msgSender, subject, body);
+                            WriteMessageToFile(tweet);
+
                             // Convert textspeak, add to hashtag list, add to sender list
-
-
-                            if (File.Exists(@"c:\Users\aidan\Documents\messages.json"))
-                            {
-                                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
-                                messageList.Messages.Add(tweet);
-
-                                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
-
-                                clearFields();
-                            }
-                            // Else create a new file and write to it
-                            else
-                            {
-                                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", "{\"messages\": []}");
-
-                                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
-                                messageList.Messages.Add(tweet);
-
-                                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
-
-                                clearFields();
-                            }
                         }
                         else
                         {
                             MessageBox.Show("Please ensure the Tweet body is between 0 and 140 characters.");
                         }
-
                         break;
 
                     // If header begins with any character other than 'S', 'E' or 'T', alert the user
@@ -231,10 +163,11 @@ namespace SET09120___NBMFS
         {
             if (!string.IsNullOrEmpty(txtHeader.Text))
             {
+                // --consider either removing these or the public versions of these
+
                 header = txtHeader.Text;
                 messageType = header.Substring(0, 1).ToUpper();
-
-
+                
                 switch (messageType)
                 {
                     // If header begins with 'S', message is an SMS
@@ -284,7 +217,6 @@ namespace SET09120___NBMFS
                 lblSubject.Visibility = Visibility.Hidden;
                 blkMsgType.Text = "";
             }
-
         }
 
         private void WriteMessageToFile(Message msgIn)
@@ -330,25 +262,10 @@ namespace SET09120___NBMFS
             txtSubject.Visibility = System.Windows.Visibility.Hidden;
             lblSubject.Visibility = System.Windows.Visibility.Hidden;
         }
-
-        private void txtHeader_KeyUp(object sender, KeyEventArgs e)
-        {
-
-        }
-
-
-
-       
-
-
-
-       
-
-
     }
 
-        /*whenWindowLoadsEvent()
-        {
-            System.IO.Directory.CreateDirectory(NMBFS);
-        }*/
+    /*whenWindowLoadsEvent()
+    {
+        System.IO.Directory.CreateDirectory(NMBFS);
+    }*/
 }
