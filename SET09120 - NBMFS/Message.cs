@@ -9,18 +9,18 @@ namespace SET09120___NBMFS
     public class Message
     {
         // Getters and setters
-        public string header { get; set; }
-        public string msgSender { get; set; }
-        public string subject { get; set; }
-        public string body { get; set; }
+        public string Header { get; set; }
+        public string MsgSender { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
 
 
         public Message(string headerIn, string senderIn, string subjectIn, string bodyIn)
         {
-            header = headerIn;
-            msgSender = senderIn;
-            subject = subjectIn;
-            body = bodyIn;
+            Header = headerIn;
+            MsgSender = senderIn;
+            Subject = subjectIn;
+            Body = bodyIn;
         }
 
 

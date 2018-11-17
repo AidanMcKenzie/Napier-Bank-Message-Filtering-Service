@@ -69,6 +69,7 @@
       <DependentUpon>MentionList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Message.cs" />
+    <Compile Include="SIR.cs" />
     <Compile Include="SIRList.xaml.cs">
       <DependentUpon>SIRList.xaml</DependentUpon>
     </Compile>

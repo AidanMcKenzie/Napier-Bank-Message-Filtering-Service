@@ -31,6 +31,7 @@ namespace SET09120___NBMFS
         public string body;
 
         public static MsgList messageList;
+        public static IncidentReportList incidentList;
 
         string headerRegex = "";
         string smsSenderRegex = @"^(\+[1-9][0-9]*(\([0-9]*\)|-[0-9]*-))?[0]?[1-9][0-9\- ]*$";
@@ -69,6 +70,7 @@ namespace SET09120___NBMFS
 
             body = txtBody.Text;
             string sortcode = txtSortCode.Text;
+            string incident = cmbIncident.Text;
 
             // Header must be a letter followed by nine numbers
             if (header.Length == 10)
@@ -90,6 +92,7 @@ namespace SET09120___NBMFS
                                 Message sms = new Message(header, msgSender, subject, body);
 
                                 WriteMessageToFile(sms);
+                                clearFields();
                             }
                             else
                             {
@@ -127,6 +130,14 @@ namespace SET09120___NBMFS
                                             Message email = new Message(header, msgSender, subject, body);
                                             WriteMessageToFile(email);
 
+                                            //incident = "TestIncident";
+
+                                            SIR sir = new SIR(header, subject, sortcode, incident);
+                                            WriteSIRToFile(sir);
+
+                                            MessageBox.Show("SIR written");
+
+                                            clearFields();
                                             // Quarantine URLs
                                         }
                                         else
@@ -140,6 +151,7 @@ namespace SET09120___NBMFS
 
                                         Message email = new Message(header, msgSender, subject, body);
                                         WriteMessageToFile(email);
+                                        clearFields();
 
                                         // Quarantine URLs
                                     }
@@ -180,6 +192,7 @@ namespace SET09120___NBMFS
                                 // Create Tweet object
                                 Message tweet = new Message(header, msgSender, subject, body);
                                 WriteMessageToFile(tweet);
+                                clearFields();
 
                                 // Convert textspeak, add to hashtag list, add to sender list
                             }
@@ -330,8 +343,6 @@ namespace SET09120___NBMFS
                 messageList.Messages.Add(msgIn);
 
                 File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
-
-                clearFields();
             }
             // Else create a new file and write to it
             else
@@ -342,8 +353,27 @@ namespace SET09120___NBMFS
                 messageList.Messages.Add(msgIn);
 
                 File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
+            }
+        }
 
-                clearFields();
+        private void WriteSIRToFile(SIR sirIn)
+        {
+            if (File.Exists(@"c:\Users\aidan\Documents\sir.json"))
+            {
+                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\sir.json"));
+                incidentList.Incidents.Add(sirIn);
+
+                File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", JsonConvert.SerializeObject(incidentList, Formatting.Indented) + Environment.NewLine);
+            }
+            // Else create a new file and write to it
+            else
+            {
+                File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", "{\"Incidents\": []}");
+                
+                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
+                incidentList.Incidents.Add(sirIn);
+
+                File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", JsonConvert.SerializeObject(incidentList, Formatting.Indented) + Environment.NewLine);
             }
         }
 
@@ -353,7 +383,6 @@ namespace SET09120___NBMFS
             txtSender.Clear();
             txtSubject.Clear();
             txtSortCode.Clear();
-            //cmbIncident.ClearValue();
             txtBody.Clear();
         }
 
@@ -375,6 +404,21 @@ namespace SET09120___NBMFS
 
             blkCurCharCount.Text = txtBody.Text.Length.ToString();
             blkMaxCharCount.Text = "140";
+
+
+
+            cmbIncident.Items.Add("Theft");
+            cmbIncident.Items.Add("Staff Attack");
+            cmbIncident.Items.Add("ATM Theft");
+            cmbIncident.Items.Add("Raid");
+            cmbIncident.Items.Add("Customer Attack");
+            cmbIncident.Items.Add("Staff Abuse");
+            cmbIncident.Items.Add("Bomb Threat");
+            cmbIncident.Items.Add("Terrorism");
+            cmbIncident.Items.Add("Suspicious Incident");
+            cmbIncident.Items.Add("Intelligence");
+            cmbIncident.Items.Add("Cash Loss");
+            cmbIncident.SelectedIndex = 0;
         }
 
         private void TxtBody_TextChanged(object sender, TextChangedEventArgs e)
