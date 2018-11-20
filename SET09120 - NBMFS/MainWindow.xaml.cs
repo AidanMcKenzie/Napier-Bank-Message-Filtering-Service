@@ -370,7 +370,7 @@ namespace SET09120___NBMFS
             {
                 File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", "{\"Incidents\": []}");
                 
-                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
+                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\sir.json"));
                 incidentList.Incidents.Add(sirIn);
 
                 File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", JsonConvert.SerializeObject(incidentList, Formatting.Indented) + Environment.NewLine);
