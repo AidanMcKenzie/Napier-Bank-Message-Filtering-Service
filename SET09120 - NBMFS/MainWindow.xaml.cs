@@ -344,7 +344,7 @@ namespace SET09120___NBMFS
             // Else create a new file and write to it
             else
             {
-                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", "{\"messages\": []}");
+                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", "{\"Messages\": []}");
 
                 messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
                 messageList.Messages.Add(msgIn);

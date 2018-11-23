@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SET09120___NBMFS
 {
@@ -39,70 +40,65 @@ namespace SET09120___NBMFS
 
         public void WriteHashtags(string bodyIn)
         {
-            List<string> hashtagsList = new List<string>();
-
             Regex hashRegex = new Regex(@"(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)");
-
-            HashList hashyList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtag.json"));
-
-            if (File.Exists(@"c:\Users\aidan\Documents\hashtag.json"))
+            
+            if (File.Exists(@"c:\Users\aidan\Documents\hashtags.json"))
             {
-                //HashList hashyList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtag.json"));
+                HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtags.json"));
 
-                //Hashtag hashtag = new Hashtag(null, 1);
-
+                // For every hashtag found in the tweet body
                 foreach (var hTag in hashRegex.Matches(bodyIn))
                 {
-                    if (!hashtagsList.Contains(hTag.ToString()))
+                    bool anyHashtagsFound = true;
+                    // Loop through every hashtag in the JSON file
+                    foreach (Hashtag hashtag in hashtagList.Hashtags.ToList())
                     {
-                        //Hashtag tempHashTagName = new Hashtag(hashtag.hashtag, 1);
-                       // hashyList.Hashtags.Add(tempHashTagName);
+                        // If the current hashtag in the JSON file matches the hashtag in the tweet body
+                        if (hashtag.hashtag == hTag.ToString())
+                        {
+                            hashtag.count++;
 
-                        hashtagsList.Add(hTag.ToString());
-                        File.WriteAllText(@"c:\Users\aidan\Documents\" + hTag.ToString() + ".json", hTag.ToString());
+                            anyHashtagsFound = true;
 
-                        //File.WriteAllText(@"c:\Users\aidan\Documents\hashtag.json", JsonConvert.SerializeObject(hashyList, Formatting.Indented) + Environment.NewLine);
+                            File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
+                            
+                            //Exit loop
+                            goto HashFound;
+                        }
+                        else
+                        {
+                            anyHashtagsFound = false;
+                        }
                     }
-                    /*else
-                    {
-                        hashtag.count++;
-                        hashyList.Hashtags.Add(hashtag);
 
-                        File.WriteAllText(@"c:\Users\aidan\Documents\hashtag.json", JsonConvert.SerializeObject(hashyList, Formatting.Indented) + Environment.NewLine);
-                    }*/
+                    if (anyHashtagsFound == false)
+                    {
+                        Hashtag newHashtag = new Hashtag(hTag.ToString(), 1);
+                        hashtagList.Hashtags.Add(newHashtag);
+
+                        File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
+                    }
+
+                HashFound:
+                    continue;
                 }
             }
             // Else create a new file and write to it
             else
             {
-                /*File.WriteAllText(@"c:\Users\aidan\Documents\hashtag.json", "{\"Hashtag\": []}");
+                File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", "{\"Hashtags\": []}");
+                HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtags.json"));
 
-                HashList hashyList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtag.json"));
-
-                foreach (Hashtag matchedHashtag in hashRegex.Matches(bodyIn))
+                // For every hashtag found in the tweet body
+                foreach (var hTag in hashRegex.Matches(bodyIn))
                 {
-                    if (!hashyList.Hashtags.Contains(matchedHashtag))
-                    {
-                        Hashtag tempHashTagName = new Hashtag(matchedHashtag.ToString(), 1);
-                        hashyList.Hashtags.Add(tempHashTagName);
+                    Hashtag newHashtag = new Hashtag(hTag.ToString(), 1);
+                    hashtagList.Hashtags.Add(newHashtag);
+                }
 
-                        File.WriteAllText(@"c:\Users\aidan\Documents\hashtag.json", JsonConvert.SerializeObject(hashyList, Formatting.Indented) + Environment.NewLine);
-                    }
-                    else
-                    {
-                        matchedHashtag.count++;
-
-                        File.WriteAllText(@"c:\Users\aidan\Documents\hashtag.json", JsonConvert.SerializeObject(hashyList, Formatting.Indented) + Environment.NewLine);
-                    }
-                }*/
+                File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
             }
         }
-
-
-
-
-
-
     }
 
     public class MsgList
