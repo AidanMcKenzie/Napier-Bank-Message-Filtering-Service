@@ -4,6 +4,19 @@
              xmlns:local="clr-namespace:SET09120___NBMFS"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style x:Key="CustomWindow" TargetType="{x:Type Window}">
+            <Setter Property="WindowStyle" Value="None"/>
+            <Setter Property="AllowsTransparency" Value="True"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="MinHeight" Value="46"/>
+            <!--CaptionHeight + ResizeBorderThickness * 2-->
+            <Setter Property="Background" Value="Yellow"/>
+            <Setter Property="BorderBrush" Value="Green"/>
+            <Setter Property="BorderThickness" Value="5"/>
+            <Setter Property="Foreground" Value="DarkRed"/>
+            <Setter Property="Template" Value="{StaticResource WindowTemplate}"/>
+        </Style>
     </Application.Resources>
 </Application>
+    
+ 

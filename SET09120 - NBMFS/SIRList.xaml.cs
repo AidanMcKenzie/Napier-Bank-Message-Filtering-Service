@@ -23,7 +23,6 @@ namespace SET09120___NBMFS
     /// </summary>
     public partial class SIRList : Window
     {
-
         public static IncidentReportList incidentList;
 
         public SIRList()
@@ -39,10 +38,20 @@ namespace SET09120___NBMFS
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             IncidentReportList incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\sir.json"));
+            MsgList messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
 
-            foreach(SIR sirNow in incidentList.Incidents)
+            // Loop through SIR emails
+            foreach (SIR sir in incidentList.Incidents)
             {
-                lstSIR.Items.Add(sirNow.header + "\n" + sirNow.incident + "\n" + sirNow.sortcode + "\n" + sirNow.subject);
+                // Loop through Messages
+                foreach (Message message in messageList.Messages)
+                {
+                    // If there is a Message with an associated SIR email, display in the listbox
+                    if (message.Header == sir.header)
+                    {
+                        lstSIR.Items.Add("Header: " + sir.header + "\n" + "Incident: " + sir.incident + "\n" + "Sort Code: " + sir.sortcode + "\n" + "Subject: " + sir.subject + "\n" + "Body: " + message.Body);
+                    }
+                }
             }
         }
     }

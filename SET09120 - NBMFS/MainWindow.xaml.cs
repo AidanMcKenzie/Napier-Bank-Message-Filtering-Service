@@ -32,6 +32,7 @@ namespace SET09120___NBMFS
 
         public static MsgList messageList;
         public static IncidentReportList incidentList;
+        public static HashList hashtagList;
 
         string headerRegex = "";
         string smsSenderRegex = @"^(\+[1-9][0-9]*(\([0-9]*\)|-[0-9]*-))?[0]?[1-9][0-9\- ]*$";
@@ -125,18 +126,12 @@ namespace SET09120___NBMFS
 
                                         if (sortcodeValid.Success)
                                         {
-                                            MessageBox.Show("SIR Email");
-
                                             Message email = new Message(header, msgSender, subject, body);
                                             WriteMessageToFile(email);
 
-                                            //incident = "TestIncident";
-
                                             SIR sir = new SIR(header, subject, sortcode, incident);
                                             WriteSIRToFile(sir);
-
-                                            MessageBox.Show("SIR written");
-
+                                            
                                             clearFields();
                                             // Quarantine URLs
                                         }
@@ -192,6 +187,8 @@ namespace SET09120___NBMFS
                                 // Create Tweet object
                                 Message tweet = new Message(header, msgSender, subject, body);
                                 WriteMessageToFile(tweet);
+                                // Find hashtags within body text and write to a file
+                                tweet.WriteHashtags(body);
                                 clearFields();
 
                                 // Convert textspeak, add to hashtag list, add to sender list

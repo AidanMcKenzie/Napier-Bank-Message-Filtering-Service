@@ -5,11 +5,11 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:SET09120___NBMFS"
       mc:Ignorable="d"
-      Title="SIRList" Width="339.854" Height="536.765" Loaded="Window_Loaded">
+      Title="SIRList" Width="600" Height="536.765" Loaded="Window_Loaded">
 
     <Grid>
-        <ListBox x:Name="lstSIR" HorizontalAlignment="Left" Height="375" Margin="34,60,0,0" VerticalAlignment="Top" Width="256"/>
-        <Label x:Name="lblSIRTitle" Content="Significant Incident Reports" HorizontalAlignment="Left" Margin="10,13,0,0" VerticalAlignment="Top" FontSize="24" FontFamily="Segoe UI Semibold"/>
+        <ListBox x:Name="lstSIR" HorizontalAlignment="Left" Height="375" Margin="34,60,0,0" VerticalAlignment="Top" Width="520"/>
+        <Label x:Name="lblSIRTitle" Content="Significant Incident Reports" HorizontalAlignment="Left" Margin="33,13,0,0" VerticalAlignment="Top" FontSize="24" FontFamily="Segoe UI Semibold"/>
         <Button x:Name="btnReturn" Content="Return" HorizontalAlignment="Left" Margin="33,460,0,0" VerticalAlignment="Top" Width="75" Click="BtnReturn_Click"/>
 
     </Grid>
