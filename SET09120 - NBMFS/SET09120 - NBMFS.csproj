@@ -65,10 +65,12 @@
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Mention.cs" />
     <Compile Include="MentionList.xaml.cs">
       <DependentUpon>MentionList.xaml</DependentUpon>
     </Compile>
     <Compile Include="Message.cs" />
+    <Compile Include="QuarantinedURL.cs" />
     <Compile Include="SIR.cs" />
     <Compile Include="SIRList.xaml.cs">
       <DependentUpon>SIRList.xaml</DependentUpon>

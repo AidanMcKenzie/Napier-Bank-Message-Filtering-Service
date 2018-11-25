@@ -32,9 +32,8 @@ namespace SET09120___NBMFS
 
         public static MsgList messageList;
         public static IncidentReportList incidentList;
-        public static HashList hashtagList;
 
-        string headerRegex = "";
+        //string headerRegex = "";
         string smsSenderRegex = @"^(\+[1-9][0-9]*(\([0-9]*\)|-[0-9]*-))?[0]?[1-9][0-9\- ]*$";
         string emailSenderRegex = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
         string tweetSenderRegex = @"\A([0-9a-zA-Z_]{1,15})|(@([0-9a-zA-Z_]{1,15}))\Z";
@@ -126,14 +125,19 @@ namespace SET09120___NBMFS
 
                                         if (sortcodeValid.Success)
                                         {
+                                            //QuarantineURL(body);
+                                            // Add to qList
+                                            // Return body text and use that in object creation
+
                                             Message email = new Message(header, msgSender, subject, body);
                                             WriteMessageToFile(email);
+                                            
 
                                             SIR sir = new SIR(header, subject, sortcode, incident);
                                             WriteSIRToFile(sir);
                                             
                                             clearFields();
-                                            // Quarantine URLs
+                                            
                                         }
                                         else
                                         {
@@ -143,6 +147,8 @@ namespace SET09120___NBMFS
                                     else
                                     {
                                         MessageBox.Show("Standard email");
+
+                                        Message.QuarantineURL(body);
 
                                         Message email = new Message(header, msgSender, subject, body);
                                         WriteMessageToFile(email);
@@ -181,7 +187,6 @@ namespace SET09120___NBMFS
                                 if (msgSender.Substring(0,1) != "@" && msgSender.Length < 15)
                                 {
                                     msgSender = "@" + msgSender;
-                                    MessageBox.Show("Added @ to handle");
                                 }
                                 
                                 // Create Tweet object
@@ -189,6 +194,9 @@ namespace SET09120___NBMFS
                                 WriteMessageToFile(tweet);
                                 // Find hashtags within body text and write to a file
                                 tweet.WriteHashtags(body);
+                                // Find mentions within the body text and write to a file
+                                tweet.WriteMentions(body);
+
                                 clearFields();
 
                                 // Convert textspeak, add to hashtag list, add to sender list
@@ -215,6 +223,62 @@ namespace SET09120___NBMFS
                 MessageBox.Show("Please enter a message header that is a single character followed by nine numbers. \n e.g.: 'E123456789'");
             }
         }
+
+
+
+
+
+
+
+        /*private void QuarantineURL(string bodyIn)
+        {
+            Regex urlRegex = new Regex(@"\S+\.\S+");
+
+            if (File.Exists(@"c:\Users\aidan\Documents\quarantine.json"))
+            {
+                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(@"c:\Users\aidan\Documents\quarantine.json"));
+
+                // For every mention found in the tweet body
+                foreach (var foundURL in urlRegex.Matches(bodyIn))
+                {
+                    // Create a new entry in the JSON file for the mention
+                    QuarantinedURL newQuarantine = new QuarantinedURL("yeet");
+                    urlList.URLs.Add(newQuarantine);
+
+                    // Write the mention list to the JSON file
+                    File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
+                }
+            }
+            // Else create a new file and write to it
+            else
+            {
+                // Create new JSON file
+                File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", "{\"Quarantine\": []}");
+                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(@"c:\Users\aidan\Documents\quarantine.json"));
+
+                // For every mention found in the tweet body
+                foreach (var foundURL in urlRegex.Matches(bodyIn))
+                {
+                    // Create a new entry in the JSON file for the mention
+                    QuarantinedURL newQuarantine = new QuarantinedURL(foundURL.ToString());
+                    urlList.URLs.Add(newQuarantine);
+                }
+
+                // Write new mentions to the JSON file
+                File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
+            }
+        }*/
+
+
+
+
+
+
+
+
+
+
+
 
 
         private void btnSIR_Click(object sender, RoutedEventArgs e)
@@ -457,9 +521,4 @@ namespace SET09120___NBMFS
             }*/
         }
     }
-
-    /*whenWindowLoadsEvent()
-    {
-        System.IO.Directory.CreateDirectory(NMBFS);
-    }*/
 }
