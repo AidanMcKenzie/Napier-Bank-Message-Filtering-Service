@@ -37,8 +37,18 @@ namespace SET09120___NBMFS
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            IncidentReportList incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\sir.json"));
-            MsgList messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
+            string sirFilepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\sir.json";
+            string msgFilepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\messages.json";
+
+            System.IO.FileInfo sirFile = new System.IO.FileInfo(sirFilepath);
+            sirFile.Directory.Create();
+
+            System.IO.FileInfo msgFile = new System.IO.FileInfo(msgFilepath);
+            msgFile.Directory.Create();
+
+
+            IncidentReportList incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(sirFilepath));
+            MsgList messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(msgFilepath));
 
             // Loop through SIR emails
             foreach (SIR sir in incidentList.Incidents)

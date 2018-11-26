@@ -34,7 +34,11 @@ namespace SET09120___NBMFS
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtags.json"));
+            string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\hashtags.json";
+            System.IO.FileInfo file = new System.IO.FileInfo(filepath);
+            file.Directory.Create();
+
+            HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(filepath));
 
             List<Hashtag> hashlist = new List<Hashtag>();
 

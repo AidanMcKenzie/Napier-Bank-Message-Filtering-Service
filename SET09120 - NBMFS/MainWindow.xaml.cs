@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -33,18 +34,8 @@ namespace SET09120___NBMFS
         public static MsgList messageList;
         public static IncidentReportList incidentList;
 
-        //string headerRegex = "";
-        string smsSenderRegex = @"^(\+[1-9][0-9]*(\([0-9]*\)|-[0-9]*-))?[0]?[1-9][0-9\- ]*$";
-        string emailSenderRegex = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
-        string tweetSenderRegex = @"\A([0-9a-zA-Z_]{1,15})|(@([0-9a-zA-Z_]{1,15}))\Z";
-        string sirRegex = @"((\d{2})|(\d))\/((\d{2})|(\d))\/((\d{4})|(\d{2}))";
-        string sortcodeRegex = @"^(\d){2}-(\d){2}-(\d){2}$";
-
-
-
-        // Create dictionary from the textwords CSV file
-        //public static Dictionary<string, string> textwordsList = File.ReadLines("c:\Users\aidan\Documents\textwords.csv").Select(line => line.Split(',')).ToDictionary(line => line[0], line => line[1]);
-
+        
+      
 
         public MainWindow()
         {
@@ -55,6 +46,12 @@ namespace SET09120___NBMFS
         // Application logic for when the user clicks the 'Send Message' button
         private void btnSend_Click(object sender, RoutedEventArgs e)
         {
+            string smsSenderRegex = @"^(\+[1-9][0-9]*(\([0-9]*\)|-[0-9]*-))?[0]?[1-9][0-9\- ]*$";
+            string emailSenderRegex = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
+            string tweetSenderRegex = @"\A([0-9a-zA-Z_]{1,15})|(@([0-9a-zA-Z_]{1,15}))\Z";
+            string sirRegex = @"((\d{2})|(\d))\/((\d{2})|(\d))\/((\d{4})|(\d{2}))";
+            string sortcodeRegex = @"^(\d){2}-(\d){2}-(\d){2}$";
+
             header = txtHeader.Text;
             if (!string.IsNullOrEmpty(header))
             {
@@ -89,7 +86,7 @@ namespace SET09120___NBMFS
                             if (body.Length > 0 && body.Length <= 140)
                             {
                                 // Create SMS object (id, header, sender, body)
-                                Message sms = new Message(header, msgSender, subject, body);
+                                Message sms = new Message(header, msgSender, subject, Message.ConvertTextspeak(body));
 
                                 WriteMessageToFile(sms);
                                 clearFields();
@@ -118,6 +115,7 @@ namespace SET09120___NBMFS
                                 if (body.Length > 0 && body.Length <= 1028)
                                 {
                                     Match detectSIR = Regex.Match(subject, sirRegex);
+                                    Regex urlRegex = new Regex(@"\S+\.\S+");
 
                                     if (detectSIR.Success)
                                     {
@@ -129,10 +127,18 @@ namespace SET09120___NBMFS
                                             // Add to qList
                                             // Return body text and use that in object creation
 
+
+                                            Message.WriteUrlToFile(body);
+
+                                            // Replaces URLs with the text <URL Quarantined>
+                                            foreach (var foundURL in urlRegex.Matches(body))
+                                            {
+                                                body = body.Replace(foundURL.ToString(), "<URL Quarantined>");
+                                            }
+
                                             Message email = new Message(header, msgSender, subject, body);
                                             WriteMessageToFile(email);
                                             
-
                                             SIR sir = new SIR(header, subject, sortcode, incident);
                                             WriteSIRToFile(sir);
                                             
@@ -147,14 +153,18 @@ namespace SET09120___NBMFS
                                     else
                                     {
                                         MessageBox.Show("Standard email");
-
-                                        Message.QuarantineURL(body);
+                                        
+                                        Message.WriteUrlToFile(body);
+                                        
+                                        // Replaces URLs with the text <URL Quarantined>
+                                        foreach (var foundURL in urlRegex.Matches(body))
+                                        {
+                                            body = body.Replace(foundURL.ToString(), "<URL Quarantined>");
+                                        }
 
                                         Message email = new Message(header, msgSender, subject, body);
                                         WriteMessageToFile(email);
                                         clearFields();
-
-                                        // Quarantine URLs
                                     }
                                 }
                                 else
@@ -190,7 +200,7 @@ namespace SET09120___NBMFS
                                 }
                                 
                                 // Create Tweet object
-                                Message tweet = new Message(header, msgSender, subject, body);
+                                Message tweet = new Message(header, msgSender, subject, Message.ConvertTextspeak(body));
                                 WriteMessageToFile(tweet);
                                 // Find hashtags within body text and write to a file
                                 tweet.WriteHashtags(body);
@@ -224,62 +234,7 @@ namespace SET09120___NBMFS
             }
         }
 
-
-
-
-
-
-
-        /*private void QuarantineURL(string bodyIn)
-        {
-            Regex urlRegex = new Regex(@"\S+\.\S+");
-
-            if (File.Exists(@"c:\Users\aidan\Documents\quarantine.json"))
-            {
-                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(@"c:\Users\aidan\Documents\quarantine.json"));
-
-                // For every mention found in the tweet body
-                foreach (var foundURL in urlRegex.Matches(bodyIn))
-                {
-                    // Create a new entry in the JSON file for the mention
-                    QuarantinedURL newQuarantine = new QuarantinedURL("yeet");
-                    urlList.URLs.Add(newQuarantine);
-
-                    // Write the mention list to the JSON file
-                    File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
-                }
-            }
-            // Else create a new file and write to it
-            else
-            {
-                // Create new JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", "{\"Quarantine\": []}");
-                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(@"c:\Users\aidan\Documents\quarantine.json"));
-
-                // For every mention found in the tweet body
-                foreach (var foundURL in urlRegex.Matches(bodyIn))
-                {
-                    // Create a new entry in the JSON file for the mention
-                    QuarantinedURL newQuarantine = new QuarantinedURL(foundURL.ToString());
-                    urlList.URLs.Add(newQuarantine);
-                }
-
-                // Write new mentions to the JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
-            }
-        }*/
-
-
-
-
-
-
-
-
-
-
-
-
+        
 
         private void btnSIR_Click(object sender, RoutedEventArgs e)
         {
@@ -398,43 +353,53 @@ namespace SET09120___NBMFS
 
         private void WriteMessageToFile(Message msgIn)
         {
-            if (File.Exists(@"c:\Users\aidan\Documents\messages.json"))
+            string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\messages.json";
+            System.IO.FileInfo file = new System.IO.FileInfo(filepath);
+            file.Directory.Create();
+
+            if (File.Exists(filepath))
             {
-                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
+                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(filepath));
                 messageList.Messages.Add(msgIn);
 
-                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
             }
             // Else create a new file and write to it
             else
             {
-                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", "{\"Messages\": []}");
+                File.WriteAllText(filepath, "{\"Messages\": []}");
 
-                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(@"c:\Users\aidan\Documents\messages.json"));
+                messageList = JsonConvert.DeserializeObject<MsgList>(File.ReadAllText(filepath));
                 messageList.Messages.Add(msgIn);
 
-                File.WriteAllText(@"c:\Users\aidan\Documents\messages.json", JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(messageList, Formatting.Indented) + Environment.NewLine);
+
+                //@"C:\TestDirectory\messages.json"
             }
         }
 
         private void WriteSIRToFile(SIR sirIn)
         {
-            if (File.Exists(@"c:\Users\aidan\Documents\sir.json"))
+            string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\sir.json";
+            System.IO.FileInfo file = new System.IO.FileInfo(filepath);
+            file.Directory.Create();
+
+            if (File.Exists(filepath))
             {
-                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\sir.json"));
+                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(filepath));
                 incidentList.Incidents.Add(sirIn);
 
-                File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", JsonConvert.SerializeObject(incidentList, Formatting.Indented) + Environment.NewLine);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(incidentList, Formatting.Indented) + Environment.NewLine);
             }
             // Else create a new file and write to it
             else
             {
-                File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", "{\"Incidents\": []}");
+                File.WriteAllText(filepath, "{\"Incidents\": []}");
                 
-                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(@"c:\Users\aidan\Documents\sir.json"));
+                incidentList = JsonConvert.DeserializeObject<IncidentReportList>(File.ReadAllText(filepath));
                 incidentList.Incidents.Add(sirIn);
 
-                File.WriteAllText(@"c:\Users\aidan\Documents\sir.json", JsonConvert.SerializeObject(incidentList, Formatting.Indented) + Environment.NewLine);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(incidentList, Formatting.Indented) + Environment.NewLine);
             }
         }
 
@@ -503,22 +468,7 @@ namespace SET09120___NBMFS
 
         private void TxtSubject_TextChanged(object sender, TextChangedEventArgs e)
         {
-            /*if (subject.Substring(0, 3).ToUpper() == "SIR")
-            {
-                txtSortCode.Visibility = Visibility.Visible;
-                lblSortCode.Visibility = Visibility.Visible;
-
-                cmbIncident.Visibility = Visibility.Visible;
-                lblIncident.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                txtSortCode.Visibility = Visibility.Hidden;
-                lblSortCode.Visibility = Visibility.Hidden;
-
-                cmbIncident.Visibility = Visibility.Hidden;
-                lblIncident.Visibility = Visibility.Hidden;
-            }*/
+            //null
         }
     }
 }

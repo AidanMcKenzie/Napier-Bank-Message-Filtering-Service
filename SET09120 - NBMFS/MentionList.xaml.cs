@@ -35,7 +35,11 @@ namespace SET09120___NBMFS
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            MentionsList mentList = JsonConvert.DeserializeObject<MentionsList>(File.ReadAllText(@"c:\Users\aidan\Documents\mentions.json"));
+            string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\mentions.json";
+            System.IO.FileInfo file = new System.IO.FileInfo(filepath);
+            file.Directory.Create();
+
+            MentionsList mentList = JsonConvert.DeserializeObject<MentionsList>(File.ReadAllText(filepath));
 
             // Loop through Mention list
             foreach (Mention mention in mentList.Mentions)

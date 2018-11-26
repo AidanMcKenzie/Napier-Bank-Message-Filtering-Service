@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -26,21 +27,39 @@ namespace SET09120___NBMFS
             Subject = subjectIn;
             Body = bodyIn;
         }
-
-
-        /* public string ConvertTextspeak(bodyIn)
-         {
-
-         }*/
-
         
+
+
+        public static string ConvertTextspeak(string bodyIn)
+        {
+            string bodyOut = bodyIn;
+
+            Dictionary<string, string> textspeakList = File.ReadLines(@"C:\TestDirectory\textwords.csv").Select(x => x.Split(',')).ToDictionary(x => x[0], x => x[1]);
+
+            // Loop through dictionary of textspeak abbreviations
+            foreach (var currentAbbr in textspeakList)
+            {
+                string pattern = string.Format(@"\b{0}\b", Regex.Escape(currentAbbr.Key.ToLower()));
+                string expanded = currentAbbr.Key + " <" + currentAbbr.Value + ">";
+
+                bodyOut = Regex.Replace(bodyOut, pattern, expanded, RegexOptions.IgnoreCase);
+
+            }
+            return bodyOut;
+        }
+
+
         public void WriteHashtags(string bodyIn)
         {
+            string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\hashtags.json";
+            System.IO.FileInfo file = new System.IO.FileInfo(filepath);
+            file.Directory.Create();
+
             Regex hashRegex = new Regex(@"(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)");
             
-            if (File.Exists(@"c:\Users\aidan\Documents\hashtags.json"))
+            if (File.Exists(filepath))
             {
-                HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtags.json"));
+                HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(filepath));
 
                 // For every hashtag found in the tweet body
                 foreach (var foundHashtag in hashRegex.Matches(bodyIn))
@@ -60,7 +79,7 @@ namespace SET09120___NBMFS
                             hashtagInFile = true;
 
                             // Write the count update to the JSON file
-                            File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
+                            File.WriteAllText(filepath, JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
                             
                             //Exit loop
                             goto HashFound;
@@ -79,7 +98,7 @@ namespace SET09120___NBMFS
                         hashtagList.Hashtags.Add(newHashtag);
 
                         // Write the hashtag list to the JSON file
-                        File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
+                        File.WriteAllText(filepath, JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
                     }
 
                 HashFound:
@@ -90,8 +109,8 @@ namespace SET09120___NBMFS
             else
             {
                 // Create new JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", "{\"Hashtags\": []}");
-                HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(@"c:\Users\aidan\Documents\hashtags.json"));
+                File.WriteAllText(filepath, "{\"Hashtags\": []}");
+                HashList hashtagList = JsonConvert.DeserializeObject<HashList>(File.ReadAllText(filepath));
 
                 // For every hashtag found in the tweet body
                 foreach (var foundHashtag in hashRegex.Matches(bodyIn))
@@ -102,17 +121,22 @@ namespace SET09120___NBMFS
                 }
 
                 // Write new hashtags to the JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\hashtags.json", JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(hashtagList, Formatting.Indented) + Environment.NewLine);
             }
         }
 
+
         public void WriteMentions(string bodyIn)
         {
+            string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\mentions.json";
+            System.IO.FileInfo file = new System.IO.FileInfo(filepath);
+            file.Directory.Create();
+
             Regex mentionRegex = new Regex(@"(?:(?<=\s)|^)@(\w*[A-Za-z_]+\w*)");
 
-            if (File.Exists(@"c:\Users\aidan\Documents\mentions.json"))
+            if (File.Exists(filepath))
             {
-                MentionsList mentList = JsonConvert.DeserializeObject<MentionsList>(File.ReadAllText(@"c:\Users\aidan\Documents\mentions.json"));
+                MentionsList mentList = JsonConvert.DeserializeObject<MentionsList>(File.ReadAllText(filepath));
 
                 // For every mention found in the tweet body
                 foreach (var foundMention in mentionRegex.Matches(bodyIn))
@@ -122,15 +146,15 @@ namespace SET09120___NBMFS
                     mentList.Mentions.Add(newMention);
 
                     // Write the mention list to the JSON file
-                    File.WriteAllText(@"c:\Users\aidan\Documents\mentions.json", JsonConvert.SerializeObject(mentList, Formatting.Indented) + Environment.NewLine);
+                    File.WriteAllText(filepath, JsonConvert.SerializeObject(mentList, Formatting.Indented) + Environment.NewLine);
                 }
             }
             // Else create a new file and write to it
             else
             {
                 // Create new JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\mentions.json", "{\"Mentions\": []}");
-                MentionsList mentList = JsonConvert.DeserializeObject<MentionsList>(File.ReadAllText(@"c:\Users\aidan\Documents\mentions.json"));
+                File.WriteAllText(filepath, "{\"Mentions\": []}");
+                MentionsList mentList = JsonConvert.DeserializeObject<MentionsList>(File.ReadAllText(filepath));
 
                 // For every mention found in the tweet body
                 foreach (var foundMention in mentionRegex.Matches(bodyIn))
@@ -141,18 +165,22 @@ namespace SET09120___NBMFS
                 }
 
                 // Write new mentions to the JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\mentions.json", JsonConvert.SerializeObject(mentList, Formatting.Indented) + Environment.NewLine);
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(mentList, Formatting.Indented) + Environment.NewLine);
             }
         }
 
         
-        public static void QuarantineURL(string bodyIn)
+        public static void WriteUrlToFile(string bodyIn)
         {
+            string filepath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\jsons\quarantine.json";
+            System.IO.FileInfo file = new System.IO.FileInfo(filepath);
+            file.Directory.Create();
+
             Regex urlRegex = new Regex(@"\S+\.\S+");
 
-            if (File.Exists(@"c:\Users\aidan\Documents\quarantine.json"))
+            if (File.Exists(filepath))
             {
-                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(@"c:\Users\aidan\Documents\quarantine.json"));
+                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(filepath));
 
                 // For every URL found in the email body
                 foreach (var foundURL in urlRegex.Matches(bodyIn))
@@ -162,15 +190,15 @@ namespace SET09120___NBMFS
                     urlList.URLs.Add(newQuarantine);
 
                     // Write the URL list to the JSON file
-                    File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
+                    File.WriteAllText(filepath, JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
                 }
             }
             // Else create a new file and write to it
             else
             {
                 // Create new JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", "{\"URLs\": []}");
-                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(@"c:\Users\aidan\Documents\quarantine.json"));
+                File.WriteAllText(filepath, "{\"URLs\": []}");
+                URLsList urlList = JsonConvert.DeserializeObject<URLsList>(File.ReadAllText(filepath));
 
                 // For every URL found in the email body
                 foreach (var foundURL in urlRegex.Matches(bodyIn))
@@ -180,12 +208,10 @@ namespace SET09120___NBMFS
                     urlList.URLs.Add(newQuarantine);
                 }
 
-                // Write new mentions to the JSON file
-                File.WriteAllText(@"c:\Users\aidan\Documents\quarantine.json", JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
+                // Write new URLs to the JSON file
+                File.WriteAllText(filepath, JsonConvert.SerializeObject(urlList, Formatting.Indented) + Environment.NewLine);
             }
         }
-
-
     }
 
     public class MsgList
